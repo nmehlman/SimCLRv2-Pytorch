@@ -4,11 +4,13 @@ import torch
 import numpy as np
 import torch.nn as nn
 import tensorflow as tf
+import os
 
 from resnet import get_resnet, name_to_params
 
 parser = argparse.ArgumentParser(description='SimCLR converter')
 parser.add_argument('tf_path', type=str, help='path of the input tensorflow file (ex: model.ckpt-250228)')
+parser.add_argument('--save_path', type=str, default='.')
 parser.add_argument('--ema', action='store_true')
 parser.add_argument('--supervised', action='store_true')
 args = parser.parse_args()
@@ -93,7 +95,8 @@ def main():
     model.fc.bias.data = b
 
     if args.supervised:
-        save_location = f'r{depth}_{width}x_sk{1 if sk_ratio != 0 else 0}{"_ema" if use_ema_model else ""}.pth'
+        save_location = os.path.join(args.save_path, f'r{depth}_{width}x_sk{1 if sk_ratio != 0 else 0}{"_ema" if use_ema_model else ""}.pth')
+        print(save_location)
         torch.save({'resnet': model.state_dict(), 'head': head.state_dict()}, save_location)
         return
     sd = {}
@@ -116,7 +119,7 @@ def main():
         m.running_var = torch.from_numpy(sd[f'{common_prefix}moving_variance'])
 
     # 3. dump the PyTorch weights.
-    save_location = f'r{depth}_{width}x_sk{1 if sk_ratio != 0 else 0}{"_ema" if use_ema_model else ""}.pth'
+    save_location = os.path.join(args.save_path, f'r{depth}_{width}x_sk{1 if sk_ratio != 0 else 0}{"_ema" if use_ema_model else ""}.pth')
     torch.save({'resnet': model.state_dict(), 'head': head.state_dict()}, save_location)
 
 

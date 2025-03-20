@@ -37,14 +37,16 @@ def run():
     parser = argparse.ArgumentParser(description='Model Downloader')
     parser.add_argument('model', type=str, choices=available_simclr_models)
     parser.add_argument('--simclr_category', type=str, choices=list(simclr_categories.keys()), default='pretrained')
+df -    parser.add_argument('--dest_dir', type=str, default='.')
     args = parser.parse_args()
     model = args.model
-    os.makedirs(model, exist_ok=True)
+    model_path = os.path.join(args.dest_dir, model)
+    os.makedirs(model_path, exist_ok=True)
     url = simclr_base_url.format(model=model, category=args.simclr_category)
     model_category = simclr_categories[args.simclr_category]
     for file in tqdm(files):
         f = file.format(category=model_category)
-        download(url + f, os.path.join(model, f))
+        download(url + f, os.path.join(model_path, f))
 
 
 if __name__ == '__main__':
